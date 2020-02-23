@@ -1,0 +1,45 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap'
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.45"
+    }
+}
+
+apply plugin: 'kotlin2js'
+apply plugin: 'kotlin-dce-js'
+apply plugin: 'org.jetbrains.kotlin.frontend'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-js"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-js"
+}
+
+// ./gradlew ... -Pprod
+def prod = project.hasProperty('prod')
+
+compileKotlin2Js {
+    kotlinOptions {
+        moduleKind = 'amd'
+    }
+}
+
+kotlinFrontend {
+    npm {
+        devDependency "terser-webpack-plugin"
+    }
+    webpackBundle {
+        if (prod) {
+            mode = "production"
+        }
+    }
+    define("PRODUCTION", prod)
+}
